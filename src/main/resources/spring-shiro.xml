@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init="true"
+    xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="  
+       http://www.springframework.org/schema/beans   
+       http://www.springframework.org/schema/beans/spring-beans-4.3.xsd  
+       http://www.springframework.org/schema/mvc   
+       http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd   
+       http://www.springframework.org/schema/tx   
+       http://www.springframework.org/schema/tx/spring-tx-4.3.xsd   
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+       http://www.springframework.org/schema/util 
+       http://www.springframework.org/schema/util/spring-util-4.3.xsd
+       http://www.springframework.org/schema/data/jpa 
+       http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.3.xsd" >
+       
+       <!-- 配置shiro中的SecurityManager -->
+       <bean id="securityManager" 
+             class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+             <property name="Realm" ref="shiroUserRealm"/>
+       </bean>
+       <!-- 配置Shiro的FilterFactoryBean对象 -->
+       <bean id="shiroFilterFactory" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+         <property name="SecurityManager" ref="securityManager"/>
+         <!-- 设置此项的目的是让用户进行登录认证 -->
+         <property name="LoginUrl" value="/doLoginUI.do"/>
+         <!-- 设置请求过滤规则 -->
+         <property name="FilterChainDefinitionMap">
+            <map>
+               <entry key="/bower_components/**" value="anon"/>
+               <entry key="/build/**" value="anon"/>
+               <entry key="/dist/**" value="anon"/>
+               <entry key="/plugins/**" value="anon"/>
+               <entry key="/user/doLogin.do" value="anon"/>
+               <entry key="/doLogout.do" value="logout"/>
+               <entry key="/**" value="authc"/><!-- 必须认证 -->
+            </map>
+         </property>
+       </bean>
+       
+     <!-- 配置bean对象的生命周期管理 -->
+     <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor">
+     </bean>
+     <!-- 配置Bean对象的代理 -->
+     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+           depends-on="lifecycleBeanPostProcessor">
+     </bean> 
+     <!-- 配置授权属性-->
+     <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+         <property name="SecurityManager" ref="securityManager"/>
+     </bean>
+</beans>
+
+
+
+
+

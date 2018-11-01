@@ -1,0 +1,167 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">下单</h3>
+      </div>
+      <!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="articlenumber" class="col-sm-2 control-label">货号</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="articlenumber">
+            </div>
+          </div>
+          <div class="form-group" >
+            <label for="saleprice" class="col-sm-2 control-label">售价</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control"  id="saleprice">
+            </div>
+          </div>                          
+          <div class="form-group">
+            <label for="amount" class="col-sm-2 control-label">数量</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control"  id="amount">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="employeename" class="col-sm-2 control-label">开单员工</label>
+            <div class="col-sm-10">
+           <!--  <input type="text" class="form-control"  id="employeename"> -->
+             <select id="employeenames" style="height:25px;width:200px">
+                    <option> </option>
+                </select>
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+          <button type="button" class="btn btn-default btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-info pull-right btn-save">Save</button>
+        </div>
+        <!-- /.box-footer -->
+      </form>
+<script type="text/javascript" src="bower_components/ztree/jquery.ztree.all.min.js"></script>
+<script type="text/javascript" src="bower_components/layer/layer.js"></script>
+<script type="text/javascript">
+ $(document).ready(function(){
+	 //页面加载完成以后加载角色信息并初始化页面
+	      doLoadProducts();
+	  var token=("storeId");
+  	 if (document.cookie.match(token)!==null){
+     	 var cookie=document.cookie;
+     	   console.log("in------>");
+     	   console.log(cookie);
+     	   
+         var storeId=cookie.match(token+"=([^;]+)")[1];
+           console.log(storeId);
+           doGetObjects(storeId);
+          
+           }
+  	
+           
+	 //事件注册
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSave);
+ });
+
+
+//页面加载完成异步加载当前页数据
+ function doGetObjects(data){
+	   var url="user/doFindObjectsByStoreId.do";
+	   
+	   var params={"storeId":data}
+	        console.log(params);
+	   $.post(url,params,function(result){
+		   console.log(result);
+		   doHandleResponseResult(result);
+	   });
+ }
+ function doHandleResponseResult(result){
+	   if(result.state==1){
+		  doSetTableBodyRows(result.data.list);
+		}else{
+		  alert(result.message);
+	   }
+ }
+ //通过服务端返回的数据初始化页面
+ function doSetTableBodyRows(data){
+	  //1.获取tbody对象，并清空内容
+	  var tBody=$("#employeenames");
+	  tBody.empty();
+	  var emptyOpt=$("<option></option>");
+	  tBody.append(emptyOpt);
+	  
+	  //2.迭代data内容将数据追加到tbody中
+	  for(var i in data){
+		  var opt=$("<option>"+data[i].username+"</option>");
+		  tBody.append(opt);
+	  }
+ }
+		  
+		  
+ 
+ function doCancel(){
+	$("#mainContentId").removeData("rowData");
+	$("#mainContentId").load("product/doProductListUI.do");
+ }
+ function doSave(){
+	 var rowData=$("#mainContentId").data("rowData");
+	 //1.获取表单数据
+	 var params=doGetEditFormData();
+	 console.log(params);
+	 //2.发起异步请求
+	 var url="product/doOrder.do";
+	 $.post(url,params,function(result){	 
+		 if(result.state==1){
+			 alert(result.message);
+			 doCancel();
+		 }else{
+			alert(result.message);
+		 }
+	 })
+ }
+ function doGetEditFormData(){
+	 var data=$("#mainContentId").data("rowData");
+	 var i=data.amount;
+	 var j=$("#amount").val();
+	 if(i<j){
+		 alert("库存不足");
+		 return;
+	 }
+	 //获取用户输入的数据
+	 var params={
+		//货号
+	    articlenumber:$("#articlenumber").val(),
+	    //售价
+	    saleprice:$("#saleprice").val(),
+	    //库存
+	    amount:i-j,
+	    //开票人
+	    employeename:$("#employeenames").val(),
+	    //订单交易数量 
+	    amountorder:j
+	 }
+	 return params;
+ }
+ function doLoadProducts(){
+	 console.log("doload---->");
+	 var data=$("#mainContentId").data("rowData");
+     if(!data)return;
+     $("#pwdDiv").remove();
+	 console.log(data);
+	 //初始化单号信息 
+	 $("#articlenumber").val(data.articlenumber);
+	 $("#saleprice").val(data.saleprice);
+	 $("#amount").val(data.amount);
+ }
+</script>
+    
+    
+    
+    
+    
+    
+    

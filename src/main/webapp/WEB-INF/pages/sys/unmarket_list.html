@@ -1,0 +1,122 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">时间内产品数据</h3>
+					
+				
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width:500px;">	
+						开始时间：<input type="date" value="" style="height:30px;"
+						id="startTime"/>
+						结束时间：<input type="date" value="" style="height:30px;"
+						id="endTime"/>
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>	
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+				  <table class="table table-hover">
+					<thead>
+					<h3 id="formTitle" style="text-align:center">所有数据</h3>
+						<tr>
+							<th>序号</th>
+							<th>货号</th>
+							<th>进货价</th>
+							<th>定价</th>
+							<th>入库时间</th>
+							<th>销售数量</th>	
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				  </table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix">
+             
+            </div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+
+	
+<script type="text/javascript">
+
+$(document).ready(function(){
+	doGetObjects();
+	
+	 $(".btn-search").click(function(){ 
+		 doGetObjects();   
+	   });
+});
+
+    //页面加载完成异步加载当前页数据
+    function doGetObjects(){
+    	var url="unmarket/doFindUnmarketObjects.do";
+    	var params={};
+    	params.startTime=$("#startTime").val();
+    	params.endTime=$("#endTime").val();
+    	console.log("startTime:"+params.startTime)
+    	console.log("endTime:"+params.endTime)
+    	if(params.startTime != null && params.startTime !=""){
+    		$("#formTitle").html(params.startTime+" 到 "+params.endTime+"的数据")
+    	}
+ 	    $.post(url,params,function(result){
+ 	    	console.log(result);
+ 		   if(result.state==1){
+ 			  doSetTableBodyRows(result.data);
+ 		   }else{
+ 			  alert(result.message);
+ 		   }
+ 	   });
+ 	   
+    };
+    //通过服务端返回的数据初始化页面
+    function doSetTableBodyRows(data){
+ 	  //1.获取tbody对象，并清空内容
+ 	  var tBody=$("#tbodyId");
+ 	  tBody.empty();
+ 	  //2.迭代data内容将数据追加到tbody中
+ 	  for(var i in data){
+ 		  if(data[i].num==undefined){
+ 			  data[i].num=0;
+ 		  }
+ 		 
+ 		 var tr=$("<tr></tr>");
+ 		 var tds=createTds(data[i],Number(i)+1);
+ 		 tr.append(tds);
+ 		 tBody.append(tr);
+ 	  }
+    }
+    function createTds(data,i){
+ 	   
+ 	   var tds=
+ 		   	 "<td>"+i+"</td>"+
+ 		     "<td>"+data.articleNumber+"</td>"+
+ 		     "<td>"+data.buyPrice+"</td>"+
+ 		     "<td>"+data.salePrice+"</td>"+
+ 		    "<td>"+new Date(data.Purchasetime).toLocaleString()+"</td>"+
+ 		     "<td>"+data.num+"</td>"
+ 	  return tds;
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+

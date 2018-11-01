@@ -1,0 +1,425 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">库存管理</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="货号">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-add"
+								data-toggle="modal" data-target="#myModalAdd">添加</button>
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="chooseAll" /> 全选</th>
+							<th>id</th>
+							<th>货号</th>
+							<th>样式（男女）</th>
+							<th>样式（季节）</th>
+							<th>样式（颜色）</th>
+							<th>尺寸</th>
+							<th>数量</th>
+							<th>进货价</th>
+							<th>标价</th>
+							<th>入库时间</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId"></tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix"></div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+
+<!-- 模态框（Modal） 添加数据-->
+<div class="modal fade" id="myModalAdd" tabindex="-1" role="dialog"
+	aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">&times;</button>
+				<h4 class="modal-title" id="myModalLabel">添加货物</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label for="articlenumber" class="col-sm-2 control-label">货号</label>
+						<div class="col-sm-10">
+							<input name="articlenumber" id="articlenumber" type="text"
+								class="form-control" placeholder="请输入货号">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="gender" class="col-sm-2 control-label">性别</label>
+						<div class="col-sm-10">
+							<select name="gender" id="gender" class="form-control">
+								<option value="男">男</option>
+								<option value="女">女</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="season" class="col-sm-2 control-label">季节</label>
+						<div class="col-sm-10">
+							<select name="season" id="season" class="form-control">
+								<option value="春">春</option>
+								<option value="夏">夏</option>
+								<option value="秋">秋</option>
+								<option value="冬">冬</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="color" class="col-sm-2 control-label">颜色</label>
+						<div class="col-sm-10">
+							<input name="color" id="color" type="text" class="form-control"
+								placeholder="请输入颜色">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="size" class="col-sm-2 control-label">尺码</label>
+						<div class="col-sm-10">
+							<input name="size" id="size" type="text" class="form-control"
+								placeholder="请输入尺码">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="price" class="col-sm-2 control-label">进货价</label>
+						<div class="col-sm-10">
+							<input name="price" id="price" type="text" class="form-control"
+								placeholder="请输入进货价">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="saleprice" class="col-sm-2 control-label">定价</label>
+						<div class="col-sm-10">
+							<input name="saleprice" id="saleprice" type="text"
+								class="form-control" placeholder="请输入标价">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="amount" class="col-sm-2 control-label">数量</label>
+						<div class="col-sm-10">
+							<input name="amount" id="amount" type="text" class="form-control"
+								placeholder="请输入数量">
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id="closeAdd"
+					data-dismiss="modal">关闭</button>
+				<button type="button" class="btn btn-primary" id="saveAdd">提交</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal -->
+</div>
+
+<!-- 模态框（Modal） 修改数据-->
+<div class="modal fade" id="myModalUpdate" tabindex="-1" role="dialog"
+	aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">&times;</button>
+				<h4 class="modal-title" id="myModalLabel">修改货物</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label for="id" class="col-sm-2 control-label">ID</label>
+						<div class="col-sm-10">
+							<input name="id" id="idUpdate" type="text" class="form-control"
+								placeholder="请输入数量">
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label for="articlenumber" class="col-sm-2 control-label">货号</label>
+						<div class="col-sm-10">
+							<input name="articlenumber" id="articlenumberUpdate" type="text"
+								class="form-control" placeholder="请输入货号">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="gender" class="col-sm-2 control-label">性别</label>
+						<div class="col-sm-10">
+							<select name="gender" id="genderUpdate" class="form-control">
+								<option value="男">男</option>
+								<option value="女">女</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="season" class="col-sm-2 control-label">季节</label>
+						<div class="col-sm-10">
+							<select name="season" id="seasonUpdate" class="form-control">
+								<option value="春">春</option>
+								<option value="夏">夏</option>
+								<option value="秋">秋</option>
+								<option value="冬">冬</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="color" class="col-sm-2 control-label">颜色</label>
+						<div class="col-sm-10">
+							<input name="color" id="colorUpdate" type="text"
+								class="form-control" placeholder="请输入颜色">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="size" class="col-sm-2 control-label">尺码</label>
+						<div class="col-sm-10">
+							<input name="size" id="sizeUpdate" type="text"
+								class="form-control" placeholder="请输入尺码">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="price" class="col-sm-2 control-label">进货价</label>
+						<div class="col-sm-10">
+							<input name="price" id="priceUpdate" type="text"
+								class="form-control" placeholder="请输入进货价">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="saleprice" class="col-sm-2 control-label">标价</label>
+						<div class="col-sm-10">
+							<input name="saleprice" id="salepriceUpdate" type="text"
+								class="form-control" placeholder="请输入标价">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="amount" class="col-sm-2 control-label">数量</label>
+						<div class="col-sm-10">
+							<input name="amount" id="amountUpdate" type="text"
+								class="form-control" placeholder="请输入数量">
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" id="closeUpdate"
+					data-dismiss="modal">关闭</button>
+				<button type="button" class="btn btn-primary" id="saveUpdate">修改</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal -->
+</div>
+<script type="text/javascript">
+   $(document).ready(function(){
+	   $("#pageId").load("doPageUI.do",doGetObjects);
+	   
+	   $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects);
+	   
+	  $("#saveAdd").click(function(){
+		  doSaveObject();
+	  });
+	  
+	  $("#closeAdd").click(function(){
+		  $("#pageId").removeData();
+		  doGetObjects();
+	  });
+	  
+	  $("#closeUpdate").click(function(){
+		  $("#pageId").removeData();
+		  doGetObjects();
+	  });
+	  $("#saveUpdate").click(function(){
+		  doUpdateObject()
+	  });
+	   
+   });
+   //修改记录
+   function doUpdateObject(){
+	   var url="stock/doUpdateObject.do";
+		var params={};
+		params.id=$("#idUpdate").val();
+		params.articlenumber=$("#articlenumberUpdate").val();
+		params.gender=$("#genderUpdate").val();
+		params.season=$("#seasonUpdate").val();
+		params.size=$("#sizeUpdate").val();
+		params.color=$("#colorUpdate").val();
+		params.price=$("#priceUpdate").val();
+		params.saleprice=$("#salepriceUpdate").val();
+		params.amount=$("#amountUpdate").val();
+		
+		$.post(url,params,function(result){
+			alert("修改成功");
+		});
+		doGetObjects();
+	  
+   }
+   
+   //通过ID删除
+   function doDeleteObjectById(btn){
+	  
+	 var hh = window.confirm("Are you sure you want to delete record?")
+	 if(!hh){
+		 return;
+	 }else{
+		 var id = $(btn).parent().parent().children("[name='id']").html();
+	   var url="stock/doDeleteObjectById.do"
+		   var params={"id":id}
+		  	$.post(url,params,function(result){
+			   alert("删除成功 ");
+
+		   });
+	   }
+	 doGetObjects();
+	   
+   }
+   
+   //通过id查询数据
+   function  doFindObjectById(btn){
+	   var id = $(btn).parent().parent().children("[name='id']").html();
+	  
+	   var url="stock/doFindObjectById.do";
+	   var params={"id":id};
+	   $.post(url,params,function(result){
+			
+			if(result){ 
+				$("#idUpdate").val(id);
+				$("#articlenumberUpdate").val(result.data.articlenumber);
+				$("#genderUpdate").val(result.data.gender);
+				$("#seasonUpdate").val(result.data.season);
+				$("#sizeUpdate").val(result.data.size);
+				$("#colorUpdate").val(result.data.color);
+				$("#priceUpdate").val(result.data.price);
+				$("#salepriceUpdate").val(result.data.saleprice);
+				$("#amountUpdate").val(result.data.amount);
+			}
+		});
+   }
+   
+   //添加记录
+   function doSaveObject(){
+	   	var url="stock/doInsertObjects.do";
+		var params={};
+		params.articlenumber=$("#articlenumber").val();
+		params.gender=$("#gender").val();
+		params.season=$("#season").val();
+		params.size=$("#size").val();
+		params.color=$("#color").val();
+		params.price=$("#price").val();
+		params.saleprice=$("#saleprice").val();
+		params.amount=$("#amount").val();
+		$.post(url,params,function(result){
+			alert("添加成功 ");
+			if(result){ 
+				$("#articlenumber").val("");
+				$("#gender").val("男");
+				$("#season").val("春");
+				$("#size").val("");
+				$("#color").val("");
+				$("#price").val("");
+				$("#saleprice").val("");
+				$("#amount").val("");
+			}
+		});
+		  
+   }
+   //处理查询按钮事件
+   function doQueryObjects(){
+	   $("#pageId").data("pageCurrent",1);
+	   doGetObjects();
+   }
+   //页面加载完成异步加载当前页数据
+   function doGetObjects(){
+	   console.log("dfadsa");
+	   var url="stock/doFindPageObjects.do";
+	   var pageCurrent = $("#pageId").data("pageCurrent");
+	   if(!pageCurrent){
+		   pageCurrent=1;
+	   }
+	   var params={"pageCurrent":pageCurrent}
+	   params.articlenumber=$("#searchNameId").val().trim();
+	   $.getJSON(url,params,function(result){
+		   console.log(params);
+
+		   if(result.state==1){
+			  doSetTableBodyRows(result.data.list);
+			  doSetPagination(result.data);
+		   }else{
+			  alert(result.message);
+		   }
+	   });
+   }
+   //通过服务端返回的数据初始化页面
+   function doSetTableBodyRows(data){
+	  //1.获取tbody对象，并清空内容
+	  var tBody=$("#tbodyId");
+	  tBody.empty();
+	  //2.迭代data内容将数据追加到tbody中
+	  for(var i in data){
+		 var tr=$("<tr></tr>");
+		 var tds=createTds(data[i]);
+		 tr.append(tds);
+		 tBody.append(tr);
+	  }
+   }
+   function createTds(data){
+	   console.log(data);
+	   var tds=
+		   	 "<td><input type='checkbox' id='chooseOne' /></td>"+
+		     "<td name='id'>"+data.id+"</td>"+
+		     "<td>"+data.articlenumber+"</td>"+
+		     "<td>"+data.gender+"</td>"+
+		     "<td>"+data.season+"</td>"+
+		     "<td>"+data.color+"</td>"+
+		     "<td>"+data.size+"</td>"+
+		     "<td>"+data.amount+"</td>"+
+		     "<td>"+data.price+"</td>"+
+		     "<td>"+data.saleprice+"</td>"+
+		     "<td>"+new Date(data.purchasetime).toLocaleString()+"</td>"+
+		     "<td><button type='button' class='btn btn-default btn-update' onclick='doFindObjectById(this)'  data-toggle='modal' data-target='#myModalUpdate'>修改</button>"+
+		     "<button type='button' class='btn btn-default btn-delete' onclick='doDeleteObjectById(this)'>删除</button></td>";
+		    
+
+	  return tds;
+   }
+</script>
+
+
+
+

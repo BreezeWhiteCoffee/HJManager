@@ -1,0 +1,207 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">用户管理</h3>
+			
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="输入用户名或#号加门店号 ">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-info btn-add">添加</button>
+							<button type="button" class="btn btn-warning btn-update">修改</button>
+							<button type="button" class="btn btn-danger btn-delete">删除</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th></th>
+							<th>用户名</th>
+							<th>职位</th>
+							<th>性别</th>
+							<th>年龄</th>
+							<th>手机号码</th>
+							<th>薪资</th>
+						    <th>门店号</th>
+							<th>创建时间</th>
+							<th>修改时间</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId"></tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix">
+			</div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+   $(document).ready(function(){
+	   $("#pageId").load("doPageUI.do",function(){
+		   doGetObjects();
+	   });
+	   $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects)
+	   .on("click",".btn-add,.btn-update",doLoadEditUI) 
+	   .on("click",".btn-delete",doQueryDeleteObjects);
+   });
+   
+   function doQueryDeleteObjects(){
+	   var id=doGetCheckedId();
+  	    if(!id){
+			  alert("请先选择");
+			  return;
+		    }
+	   if(confirm("是否确认要删除该用户信息?")){
+		   doDeleteObjects(id);
+	   }else{
+		   return;
+	   }
+   }
+	   
+     function doDeleteObjects(id){
+    	console.log(id);
+    	 var params={"userId":id};
+    	 var url ="user/doDeleteObjects.do";
+    	 $.post(url,params,function(result){
+    		 if(result.state==1){
+    			 doGetObjects();
+   		   }else{
+   			  alert(result.message);
+   		   }
+    	 });
+   }
+		      
+	   
+   
+   function doLoadEditUI(){
+	   //1.判定点击的对象
+	   var title;
+	   if($(this).hasClass("btn-add")){
+		   title="添加用户";
+		   doLoadPage(title);
+	   }else if($(this).hasClass("btn-update")){
+		   title="修改用户";
+		   var id=doGetCheckedId();
+		   console.log("id="+id)
+		   if(!id){
+			  alert("请先选择");
+			  return;
+		   }
+		   //基于id进行查询并加载编辑页面
+		   doFindObjectById(id,title);
+	   }
+   }
+   function doFindObjectById(id,title){
+	   //1.params
+	   var params={"userId":id};
+	   //2.url
+	   var url="user/doFindObjectById.do";
+	   //3.ajax request
+	   $.getJSON(url,params,function(result){//JsonResult
+		   if(result.state==1){
+			  $("#mainContentId").data("rowData",result.data); 
+	          doLoadPage(title);
+		   }else{
+			  alert(result.message);
+		   }
+	   });
+   }
+  
+   function doGetCheckedId(){
+	 return $("tbody input[name='radioId']:checked").val();
+   }
+   function doLoadPage(title){
+	   var url="user/doUserEditUI.do"
+	   $("#mainContentId").load(url,function(){
+		   $(".box-title").html(title);
+	   }) 
+   }
+   
+  
+   //处理查询按钮事件
+   function doQueryObjects(){
+	   $("#pageId").data("pageCurrent",1);
+	   doGetObjects();
+   }
+   //页面加载完成异步加载当前页数据
+   function doGetObjects(){
+	   var url="user/doFindPageObjects.do";
+	   var pageCurrent=$("#pageId").data("pageCurrent");
+	   if(!pageCurrent)pageCurrent=1;
+	   var params={"pageCurrent":pageCurrent}
+	   //获取用户在搜索框中输入的信息
+	   var searchValue=$("#searchNameId").val().trim();
+	   var index=searchValue.indexOf('#');
+	   //判断是否输入的为门店号
+	   if (index==0){
+		 var url="user/doFindPageObjectsByStoreId.do";
+		 var storeId=searchValue.substring(1);//截取#号后面的门店号
+		 //对门店号的格式进行检查 只能输入数字
+		 if (!(/^[0-9]+$/.test(storeId))){
+			 alert("输入的门店号格式不正确，请重新输入");
+			 return;
+		 }
+		 params.storeId=searchValue.substring(1);
+	   }else{
+	     params.username=$("#searchNameId").val().trim();
+	        console.log(params);}
+	   $.post(url,params,function(result){
+		   console.log(result);
+		   doHandleResponseResult(result);
+	   });
+   }
+   function doHandleResponseResult(result){
+	   if(result.state==1){
+		  doSetTableBodyRows(result.data.list);
+		  doSetPagination(result.data);
+		}else{
+		  alert(result.message);
+	   }
+   }
+   //通过服务端返回的数据初始化页面
+   function doSetTableBodyRows(data){
+	  //1.获取tbody对象，并清空内容
+	  var tBody=$("#tbodyId");
+	  tBody.empty();
+	  
+	  //2.迭代data内容将数据追加到tbody中
+	  for(var i in data){
+		  var tr=$("<tr></tr>");
+		  tr.data("rowData",data[i]);
+		  var tds=doCreateTds(data[i]);
+		  tr.append(tds);
+		  tBody.append(tr);
+	  }
+   }
+   function doCreateTds(row){
+	   console.log(row);
+	   var tds="<td><input type='radio' name='radioId' value='"+row.id+"' ></td>"+
+	     "<td>"+row.username+"</td>"+
+	     "<td>"+row.sysRole.name+"</td>"+
+	     "<td>"+row.gender+"</td>"+
+	     "<td>"+row.age+"</td>"+
+	     "<td>"+row.mobile+"</td>"+
+	     "<td>"+row.salary+"</td>"+
+	     "<td>"+row.storeId+"</td>"+
+	     "<td>"+new Date(row.createTime).toLocaleString()+"</td>"+
+	     "<td>"+new Date(row.modifiedTime).toLocaleString()+"</td>" 
+       return tds;
+   }
+</script>
+
+
+
+

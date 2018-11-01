@@ -1,0 +1,176 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">销售管理</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="商品货号">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-buy">下单</button>
+							<button type="button" class="btn btn-default btn-return">退货</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+				  <table class="table table-hover">
+					<thead>
+						<tr>
+						    <th></th>
+						    <th>序号</th>
+							<th>货号</th>
+							<th>性别</th>
+							<th>季节</th>
+							<th>尺码</th>
+							<th>颜色</th>
+							<th>库存</th>
+							<th>售价</th>
+							<th>进货时间</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				  </table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix">
+            </div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+   $(function(){
+	  $("#pageId").load("doPageUI.do",function(){
+		  doGetObjects();
+	  });
+	  $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects)
+	   .on("click",".btn-buy",doOrder)
+	   .on("click",".btn-return",doReturn);
+   });
+   //退货
+   function doReturn(){
+	   var url="product/doProductEditUI1.do";
+		$("#mainContentId").load(url);
+   }
+   //下单
+   function doOrder(){
+			var rowData=doGetCheckedItem();
+			if(!rowData){
+				alert("请先选择");
+				return;
+			}
+			$("#mainContentId").data("rowData",rowData);
+		//2.异步加载编辑页面
+		var url="product/doProductEditUI.do";
+		$("#mainContentId").load(url);//假如"#mainContentId"这个位置有页面则replace
+	}
+	function doGetCheckedItem(){
+		var tr=$("tbody input[type='radio']:checked")
+		       .parents("tr");
+		if(tr)return tr.data("rowData");
+	}
+   //根据货号查询商品
+   function doQueryObjects(){
+	   //初始化当前页码值
+	   $("#pageId").data("pageCurrent",1);
+	   //执行查询操作(复用doGetObjects函数)
+	   doGetObjects();
+   }
+   function doGetObjects(){
+	   //1.params
+	   //获取在Page.html中绑定的当前页码值
+	   var pageCurrent=$("#pageId").data("pageCurrent");
+	   //假如没有值,设置初始值为1
+	   if(!pageCurrent)pageCurrent=1;
+	   //var params="pageCurrrent="+pageCurrent;
+	   var params={"pageCurrent":pageCurrent};
+	   //获取查询时用户输入的名字
+	   var articlenumber=$("#searchNameId").val();
+	   if(articlenumber)params.articlenumber=articlenumber;
+	   //2.url
+	   var url="product/doFindAll.do";
+	   //3.ajax request
+	   $.getJSON(url,params,function(result){
+		   doHandleResponseResult(result);
+	   });
+   }
+   function doHandleResponseResult(result){
+	   if(result.state==1){
+		  doSetTableBodyRows(result.data.list);
+		  doSetPagination(result.data);
+	   }else{
+		  doSetTableBodyErrors(result.message);
+	   }
+   }
+   function doSetTableBodyErrors(message){
+	   //获取body对象并清空
+	   var tBody=$("#tbodyId");
+	   tBody.empty();
+	   //创建tr对象
+	   var tr=$("<tr></tr>");
+	   //创建td对象
+	   //var len=$("table thead").find("tr").find("th").length;
+	   var len=$("table th").length;
+	   var td=$("<td></td>");
+	   td.prop("colspan",len);
+	   td.append(message);
+	   tr.append(td);
+	   //将tr追加到tbody
+	   tBody.append(tr);
+   }
+   function doSetTableBodyRows(list){
+	   
+	  //获取tbody对象,并清空
+	   var tBody=$("#tbodyId");
+	   tBody.empty();
+	   //2.迭代数据,并追加到tBody
+	   for(var i in list){
+		  //2.1构建tr对象
+		  var tr=$("<tr></tr>");
+		  tr.data("id",list[i].id);
+		  //2.2构建tds对象
+		  var tds=doCreateTds(list[i],i);
+		  //2.3将tds对象追加到tr中
+		  tr.append(tds);
+		  tr.data("rowData",list[i]);
+		  //2.4将tr追加到tbody中
+		  tBody.append(tr);
+	   }
+   }
+   function doCreateTds(row,i){
+	   var tds="<td><input type='radio' class='cBox' name='cItem'/></td>"+
+       "<td>"+(parseInt(i)+1)+"</td>"+
+	   "<td>"+row.articlenumber+"</td>"+
+       "<td>"+row.gender+"</td>"+
+       "<td>"+row.season+"</td>"+
+       "<td>"+row.size+"</td>"+
+       "<td>"+row.color+"</td>"+
+       "<td>"+row.amount+"</td>"+
+       "<td>"+row.saleprice+"</td>"+
+       "<td>"+new Date(row.purchasetime).toLocaleString()+"</td>"
+       return tds;
+   }
+</script>
+
+
+
+
+
+
+
+
+
+
+

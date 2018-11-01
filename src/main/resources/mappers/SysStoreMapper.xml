@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.SysStoreDao">
+      <resultMap type="jxc.common.vo.Node" id="store">
+      <!--  <id column="id" property="id"/> -->
+      <result column="store_id" property="storeId"/>
+      <result column="store_name" property="storeName"/>
+      <result column="store_address" property="storeAddress"/>
+      <result column="store_telephone" property="storeTelephone"/>  
+      </resultMap>
+
+    <select id="findZTreeNodes" 
+             resultMap="store">
+       select store_id,store_name 
+        from stores    
+    </select>
+    
+    <!--根据门店id查找门店地址信息 -->
+    <select id="doFindStoreInfoByStoreId"
+                  resultType="String">
+    select store_name 
+        from stores  where store_id =#{storeId}  
+    </select>
+    
+     <!--查找所有门店信息-->
+    <select id="findObjects" 
+             resultMap="store">
+       select *
+        from stores 
+        <include refid="queryWhereId"></include> 
+         order by createTime desc   
+    </select>
+    
+    <!--查找指定门店的数量-->
+    <select id="getRowCounts" resultType="int">
+        select count(*) 
+        from stores 
+        <include refid="queryWhereId"></include> 
+    </select>
+    
+    <!--查找指定门店的信息-->
+     <select id="FindPageObjectsByStoreId" resultMap="store">
+         select *
+         from stores 
+       	<where>
+             store_id=#{storeId}
+         </where>
+          order by createTime desc  
+    </select>
+    
+    <!--查找指定门店的数量-->
+    <select id="getRowCountsByStoreId" resultType="int">
+        select count(*) 
+        from stores 
+           <where>
+             store_id=#{storeId}
+           </where>
+    </select>
+  
+     <sql id="queryWhereId">
+       <where>
+         <if test="storeName!=null and storeName!=''">
+            store_name like concat("%",#{storeName},"%")
+         </if>
+       </where>
+   </sql>
+</mapper>
+  
+   
+       
+   
+
+        
+
+    
+
+
+

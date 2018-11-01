@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init="true"
+    xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="  
+       http://www.springframework.org/schema/beans   
+       http://www.springframework.org/schema/beans/spring-beans-4.3.xsd  
+       http://www.springframework.org/schema/mvc   
+       http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd   
+       http://www.springframework.org/schema/tx   
+       http://www.springframework.org/schema/tx/spring-tx-4.3.xsd   
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+       http://www.springframework.org/schema/util 
+       http://www.springframework.org/schema/util/spring-util-4.3.xsd
+       http://www.springframework.org/schema/data/jpa 
+       http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.3.xsd" >
+       
+       <util:properties id="cfg" location="classpath:configs.properties"/>
+       <!-- 整合Druid连接池 -->
+       <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+             init-method="init" 
+             destroy-method="close" 
+             lazy-init="false">
+             <property name="DriverClassName" value="#{cfg.jdbcDriver}"/>
+             <property name="Url" value="#{cfg.jdbcUrl}"/>
+             <property name="Username" value="#{cfg.jdbcUser}"/>
+             <property name="Password" value="#{cfg.jdbcPassword}"/>
+       </bean>
+       <!--整合SqlSesionFactoryBean对象(通过此对象创建SqlSessionFactory)  -->
+       <bean id="sqlSessionFactory" 
+             class="org.mybatis.spring.SqlSessionFactoryBean">
+             <property name="DataSource" ref="dataSource"/>
+             <property name="MapperLocations" 
+                       value="classpath*:mappers/*Mapper.xml"/>
+            <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <!--使用下面的方式配置参数，一行配置一个 -->
+                        <value>
+                            offsetAsPageNum=true
+                            rowBoundsWithCount=true
+                            pageSizeZero=true
+                            reasonable=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+       </bean>
+       <!-- 配置dao接口扫描，底层会基于dao接口创建这个接口的代理对象，这个代理
+                        对象内部会通过mybatis访问数据库 -->
+       <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+            <property name="BasePackage" value="jxc.**.dao"/>
+            <property name="SqlSessionFactoryBeanName" 
+                      value="sqlSessionFactory"/>
+       </bean>
+</beans>
+
+
+
+
+

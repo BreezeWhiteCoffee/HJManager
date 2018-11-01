@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.UnmarketDao">
+
+
+
+
+	<!-- 查询某一时间段内的商品销售数量 -->
+	<select id="findUnmarketObjects" resultType="map">
+		select a.articlenumber as articleNumber,a.price as buyPrice
+		,a.saleprice as salePrice ,a.Purchasetime  ,num FROM
+		product a
+		LEFT JOIN
+		(SELECT articlenumber,sum(amount)as num ,createTime
+		as creatTime FROM orders
+		<if
+			test="startTime != null and startTime !='' and endTime !=null and endTime !=''">
+			WHERE TO_DAYS(createTime) BETWEEN TO_DAYS(#{startTime}) and
+			TO_DAYS(#{endTime})
+		</if>
+		GROUP BY articlenumber )b ON a.articlenumber = b.articlenumber
+		ORDER BY
+		num
+	</select>
+	<!-- 查询某一时间段外的商品销售数量 -->
+	<select id="findUnmarketNotObjects" resultType="map">
+		select a.articlenumber as articleNumber,a.price as buyPrice ,a.saleprice as
+		salePrice ,a.Purchasetime as storageTime ,num FROM product a
+		LEFT JOIN
+		(SELECT articlenumber,sum(amount)as num ,createTime as creatTime FROM
+		orders
+		GROUP BY articlenumber )b ON a.articlenumber = b.articlenumber
+		ORDER BY num
+	</select>
+
+
+
+</mapper>
+
+
+

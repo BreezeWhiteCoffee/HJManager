@@ -1,0 +1,223 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">所有产品销售数据</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="货名">
+					
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							<button type="button" 
+							class="btn btn-default btn-container"
+							data-toggle="modal" data-target="#myModalAdd"
+							>生成柱状图</button>
+							<button type="button" 
+							class="btn btn-default btn-print"  onclick="saleInfoExport()">导出数据</button>
+							
+						</div>
+					</div>
+				</div>
+	
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+				  <table class="table table-hover">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>货号</th>
+							<th>进货价</th>
+							<th>定价</th>
+							<th>销售数量</th>
+							<th>销售额</th>
+							<th>利润</th>
+							
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				  </table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix">
+             
+            </div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+
+
+<!-- 模态框（Modal） 饼状图-->
+<div class="modal fade" id="myModalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					利润柱状图
+				</h4>
+			</div>
+			<div class="modal-body">
+			<div id="container" style="width: 550px; height: 400px; margin: 0 auto"></div>
+			
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default"  data-dismiss="modal">关闭</button>
+				
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>
+ 
+
+
+
+	
+<script type="text/javascript">
+//excel表
+ function saleInfoExport(){
+	var url = "excel/saleInfoExport.do";
+     $.post(url,function(result){
+    	 alert(result);
+     })
+    };
+
+
+$(document).ready(function(){
+	doGetObjects();
+	
+	 $(".btn-search").click(function(){
+		 doGetObjects();   
+	   });
+});
+
+    //页面加载完成异步加载当前页数据
+    function doGetObjects(){
+    	var url="strategy/doFindSalesObjects.do";
+    	var  params={};
+    	 params.articleNumber=$("#searchNameId").val().trim();
+ 	    $.post(url,params,function(result){
+ 	    	console.log(result);
+ 		   if(result.state==1){
+ 			  doSetTableBodyRows(result.data);
+ 			  //柱状图数据
+ 		        var xParams = new Array();
+                var yProfit = new Array();
+                var ySaleMoney = new Array();
+                for(var i=0;i<result.data.length;i++) {
+                     xParams[i] = result.data[i].articleNumber;
+                     yProfit[i] = result.data[i].profit;
+                     ySaleMoney[i] = result.data[i].saleMoney;
+                }
+               //柱状图
+               Highcharts.chart('container', {
+                   chart: {
+                       type: 'column',
+                       options3d: {
+                           enabled: true,
+                           alpha: 15,
+                           beta: 15,
+                           viewDistance: 25,
+                           depth: 40
+                       }
+                   },
+                   title: {
+                       text: '各商品销售额及利润'
+                   },
+                   xAxis: {
+                       categories: xParams,
+                       labels: {
+                           skew3d: true,
+                           style: {
+                               fontSize: '16px'
+                           }
+                       }
+                   },
+                   yAxis: {
+                       allowDecimals: false,
+                       min: 0,
+                       title: {
+                           text: '金额（元）',
+                           skew3d: true
+                       }
+                   },
+                   tooltip: {
+                       headerFormat: '<b>{point.key}</b><br>',
+                       pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: {point.y} / {point.stackTotal}'
+                   },
+                   plotOptions: {
+                       column: {
+                           stacking: 'normal',
+                           depth: 40
+                       }
+                   },
+                   series: [{
+                       name: '销售额',
+                       data: ySaleMoney,
+                       stack:1
+                   }, {
+                       name: '利润',
+                       data: yProfit,
+                       stack:2
+
+                   }]
+               });
+ 		   }else{
+ 			  alert(result.message);
+ 		   }
+ 	   });
+ 	   
+    };
+    //通过服务端返回的数据初始化页面
+    function doSetTableBodyRows(data){
+ 	  //1.获取tbody对象，并清空内容
+ 	  var tBody=$("#tbodyId");
+ 	  tBody.empty();
+ 	  //2.迭代data内容将数据追加到tbody中
+ 	  for(var i in data){
+ 		  if(data[i].num==undefined){
+ 			  data[i].num=0;
+ 			 data[i].saleMoney=0;
+  		     data[i].profit=0;
+ 		  }
+ 		 var tr=$("<tr></tr>");
+ 		 var tds=createTds(data[i],Number(i)+1);
+ 		 tr.append(tds);
+ 		 tBody.append(tr);
+ 	  }
+    }
+    function createTds(data,i){
+ 	   
+ 	   var tds=
+ 		   	 "<td>"+i+"</td>"+
+ 		     "<td>"+data.articleNumber+"</td>"+
+ 		     "<td>"+data.buyPrice+"</td>"+
+ 		     "<td>"+data.salePrice+"</td>"+
+ 		     "<td>"+data.num+"</td>"+
+ 		     "<td>"+data.saleMoney+"</td>"+
+ 		     "<td>"+data.profit+"</td>"
+ 	  return tds;
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+

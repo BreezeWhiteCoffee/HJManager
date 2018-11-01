@@ -1,0 +1,58 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">退货</h3>
+      </div>
+      <!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="id" class="col-sm-2 control-label">订单号</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="id">
+            </div>
+          </div>                        
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+          <button type="button" class="btn btn-default btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-info pull-right btn-save">Save</button>
+        </div>
+        <!-- /.box-footer -->
+      </form>
+<script type="text/javascript" src="bower_components/ztree/jquery.ztree.all.min.js"></script>
+<script type="text/javascript" src="bower_components/layer/layer.js"></script>
+<script type="text/javascript">
+ $(document).ready(function(){
+	 //事件注册
+	 $(".box-footer")
+	 .on("click",".btn-cancel",doCancel)
+	 .on("click",".btn-save",doSaveOrUpdate);
+ });
+ function doCancel(){
+	$("#mainContentId").removeData("rowData");
+	$("#mainContentId").load("product/doProductListUI.do");
+ }
+ function doSaveOrUpdate(){
+	 //1.获取表单数据
+	 var params={id:$("#id").val()};
+	 //2.发起异步请求
+	 var url="product/doReturn.do";
+	 $.post(url,params,function(result){	 
+		 if(result.state==1){
+			 alert(result.message);
+			 doCancel();
+		 }else{
+			alert(result.message);
+		 }
+	 })
+ }
+</script>
+    
+    
+    
+    
+    
+    
+    

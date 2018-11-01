@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.SysLogDao">
+       <!-- 用于向表中写入数据 -->
+    <insert id="insertObject"
+                useGeneratedKeys="true"
+                keyProperty="id"
+            parameterType="jxc.sys.entity.SysLog">
+      insert into logs
+      (id,username,method,params,time,ip,
+       createTime)
+      values
+      (null,#{username},#{method},#{params},#{time},#{ip},
+       now()) 
+    </insert>
+
+
+
+
+    <!-- 基于id执行删除操作 -->
+    <delete id="deleteObjects">
+        delete from logs
+        where id in <!-- (1,2,3,4,5) -->
+        <foreach collection="ids"
+                 open="("
+                 close=")"
+                 separator=","
+                 item="item">
+              #{item}   
+        </foreach>
+    </delete>
+    
+    <!-- mybatis中通过sql标签定义SQL共性 -->
+    <sql id="queryWhereId">
+        <where>
+          <if test="username!=null and username!=''">
+          username like concat('%',#{username},'%')
+          </if>
+        </where>
+    </sql>
+    <!-- 分页查询当前页记录 -->
+    <select id="findPageObjects"
+            resultType="jxc.sys.entity.SysLog">
+            select * 
+            from logs
+            <include refid="queryWhereId"/>
+            order by createTime desc
+    </select>
+    <!-- 按条件统计总记录数 -->
+    <select id="getRowCount"
+            resultType="int">
+            select count(*)
+            from logs
+            <include refid="queryWhereId"/>
+    </select>
+</mapper>
+
+
+

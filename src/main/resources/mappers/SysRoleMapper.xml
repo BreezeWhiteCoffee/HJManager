@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.SysRoleDao">
+   
+   <!-- 获取所有checkbox对象 -->
+   <select id="findObjects"
+           resultType="jxc.common.vo.CheckBox">
+           select id,name
+           from roles        
+   </select>
+   
+   
+   <!-- 获取指定roleId的权限信息 -->
+     <select id="findPermissionsByRoleId" parameterType="int" resultType="String">
+        select permission from roles where id =#{roleId}
+     </select>
+</mapper>
+
+
+

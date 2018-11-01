@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.SysUserDao">
+    
+ <resultMap type="jxc.sys.entity.SysUser" id="users" autoMapping="true">
+ <id column="id" property="id"/>
+ <result column="username" property="username"/>
+ <result column="password" property="password"/>
+ <result column="salt" property="salt"/>
+ <result column="gender" property="gender"/>
+ <result column="mobile" property="mobile"/>
+ <result column="age" property="age"/>
+ <result column="salary" property="salary"/>
+ <result column="store_id" property="storeId"/>
+ <result column="createTime" property="createTime"/>
+ <result column="modifiedTime" property="modifiedTime"/>
+ </resultMap>
+ 
+ 
+<resultMap type="jxc.sys.entity.SysUser" id="userRole" extends="users">
+             <association property="sysRole" 
+                          javaType="jxc.sys.entity.SysRole"
+                              >
+              <id column="roleId" property="roleId"/>
+              <result column="name" property="name"/>
+              <result column="note" property="note"/>
+               <result column="permission" property="permission"/>
+             </association>
+</resultMap>
+
+
+	<!--登录验证  -->
+	<select id="findUserByUserName" resultMap="users">
+	    select * from users where username=#{username}
+	</select>
+ 
+ 
+  <!-- 删除指定id用户的信息 -->
+  <delete id="doDeleteObjects" parameterType="int">
+      delete from users where id = #{userId}
+  </delete>
+  
+  
+    <!-- 更新指定用户的信息 -->
+    <update id="updateObject" parameterType="jxc.sys.entity.SysUser">
+          update users
+          <!-- 思考：假如不使用动态sql如何对字段进行空值判定 -->
+          <set>
+             <if test="username!=null and username!=''">
+               username=#{username},
+             </if>
+             <if test="gender!=null and gender!=''">
+               gender=#{gender},
+             </if>
+             <if test="age!=null and age!=''">
+               age=#{age},
+             </if>
+             <if test="mobile!=null and mobile!=''">
+                mobile=#{mobile},
+             </if>
+             <if test="salary!=null and salary!=''">
+               salary=#{salary},
+             </if>
+              <if test="storeId!=null and storeId!=''">
+                store_id=#{storeId},
+             </if>
+             modifiedTime=now()
+          </set>
+          where id=#{id}      
+   </update>
+ 
+   <!-- 根据用户id查询对应用户信息 -->
+   <select id="doFindObjectById" 
+           parameterType="int"
+          resultMap="users">
+         select * from users where id =#{userId}
+        
+     </select>
+   
+   
+   <!-- 查询用户表所有用户信息 -->
+   <select id="findObjects"
+          resultMap="userRole">
+        select  t1.*,t3.name,t3.id as roleId
+				from users t1 LEFT JOIN user_role t2
+			on t1.id=t2.user_id LEFT JOIN roles t3
+			on t2.role_id=t3.id
+         <include refid="queryWhereId"/>  
+         order by createTime desc        
+   </select>
+ 
+ <!-- 查询用户表所有用户信息 -->
+   <select id="FindPageObjectsByStoreId"
+          resultMap="userRole">
+        select  t1.*,t3.name 
+				from users t1 LEFT JOIN user_role t2
+			on t1.id=t2.user_id LEFT JOIN roles t3
+			on t2.role_id=t3.id
+         where t1.store_id=#{storeId}
+         order by createTime desc       
+   </select>
+ 
+   <select id="getRowCounts"
+           resultType="int">
+           select count(*)
+           from users
+           <include refid="queryWhereId"/>        
+   </select>
+   
+   <select id="getRowCountsByStoreId"
+           resultType="int">
+           select count(*)
+           from users
+           where store_id=#{storeId}
+   </select>
+   
+   <!--  更新用户表-->
+   <insert id="insertObject"
+             parameterType="jxc.sys.entity.SysUser"
+             useGeneratedKeys="true"
+             keyProperty="id"
+             >
+        insert into users
+       (id,username,password,salt,gender,age,mobile,salary,store_id,createTime,modifiedTime)
+       values 
+         (null, #{username},#{password},#{salt},#{gender},
+         #{age},${mobile},#{salary},#{storeId},now(),now())
+     
+   </insert>
+   
+   <sql id="queryWhereId">
+       <where>
+         <if test="username!=null and username!=''">
+            username like concat("%",#{username},"%")
+         </if>
+       </where>
+   </sql>
+    
+</mapper>
+
+
+

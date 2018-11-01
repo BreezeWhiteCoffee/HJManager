@@ -1,0 +1,231 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配置管理</h3>
+
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="参数名">
+					
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+                                <i class="fa fa-search"></i>
+							</button>
+							
+							<button type="button" 
+							class="btn btn-default btn-delete">删除</button>
+							<button type="button" class="btn btn-default btn-add">添加</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<form>
+				  <table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="checkAll">全选</th>
+							<th>参数名</th>
+							<th>参数值</th>
+							<th>创建日期</th>
+							<th>修改日期</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+					</tbody>
+				  </table>
+				</form>
+			</div>
+			<!-- /.box-body -->
+			<div id="pageId" class="box-footer clearfix">
+             
+            </div>
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+   $(function(){
+	   $("#pageId").load("doPageUI.do",function(){
+		   doGetObjects();
+		   
+	   });
+	   //查询,删除,添加按钮事件注册
+	   $(".input-group-btn")
+	   .on("click",".btn-search",doQueryObjects)
+	   .on("click",".btn-delete",doDeleteObjects)
+	   .on("click",".btn-add",doShowEditDialog)
+	   //thead中的全选按钮事件注册(change事件)
+       $("thead")
+	   .on("change","#checkAll",doCheckAll);
+	   //$("#checkAll").change(doCheckAll);
+	   //tbody中checkbox对象事件注册
+       $("#tbodyId")
+	   .on("change",".cBox",doChangeCheckAllState)
+	   .on("click",".btn-update",doShowEditDialog);
+	   //说明:采用on方法注册事件,允许on方法内部的元素暂时不存在
+   });
+   function doShowEditDialog(){
+	   var url="config/doConfigEditUI.do";
+	   
+	   var title;
+	   if($(this).hasClass("btn-add")){
+		   title="添加配置信息"
+	   }else{
+		   title="修改配置信息";
+		   //获取当前行的数据
+		   var rowData=
+		   $(this).parents("tr").data("rowData");
+		   //将数据绑定当前模态框上
+		   $("#myModal").data("rowData",rowData);
+	   }
+	   //在模态框的指定位置异步加载编辑页面
+	   $("#myModal .modal-body")
+	   .load(url,function(){
+		 //设置模态框的标题
+		 $("#myModalLabel").html(title);
+		 //页面加载完成显示模态框
+	     $("#myModal").modal("show");
+	   })
+   }
+   
+   //执行删除操作
+   function doDeleteObjects(){
+	  //1.获得所有选中checkbox的状态值.
+	  var array=doGetCheckedIds();
+	  //2.判定是否有值,没有值则给出提示
+	  if(array.length==0){
+		  alert("请先选中");
+		  return;
+	  }
+	  //3.异步提交要删除的对象id值,并处理响应结果
+      var url="config/doDeleteObjects.do";
+      var params={ids:array.toString()}//1,2,3,4,5
+	  $.post(url,params,function(result){
+		  if(result.state==1){
+			  alert(result.message);
+			  doGetObjects();
+		  }else{
+			  alert(result.message);
+		  }
+	  });
+   }
+   function doGetCheckedIds(){
+	   //1.定义数组用于存储选中的checkbox的值
+	   var array=[];
+	   //2.迭代所有tbody中checkbox对象并获取选中的值
+	   $("#tbodyId input[type=checkbox]")
+	   .each(function(){
+		   if($(this).prop("checked")){
+			  array.push($(this).val());
+		   }
+	   });
+	   //3.返回选中的值.
+	   return array;
+   }
+   
+   function doChangeCheckAllState(){
+	   //1.获取tbody中所有checkbox对象状态进行与操作的结果
+	   var flag=true;
+	   $("#tbodyId input[type=checkbox]")
+	   .each(function(){
+		   flag=flag&&$(this).prop("checked")
+	   });
+	   //2.将tbody中checkbox最终与状态的结果影响thead中checkbox的状态.
+	   $("#checkAll").prop("checked",flag);
+   }
+   
+   function doCheckAll(){
+	 //1.获得点击对象(全选的checkbox)的checked属性值
+	 var flag=$(this).prop("checked");
+	 //2.让全选对象的状态值影响tbody中checkbox的状态值.
+    /*$("#tbodyId input[type=checkbox]")
+     .each(function(){
+    	 $(this).prop("checked",flag);
+     }); */
+     
+     $("#tbodyId input[type=checkbox]")
+     .prop("checked",flag);
+   }
+   
+   //点击查询按钮时执行此方法
+   function doQueryObjects(){
+	   //每次查询时重新初始化页码值。
+	   $("#pageId").data("pageCurrent",1);
+	   doGetObjects();
+   }
+   //基于页码获取当前页数据信息
+   function doGetObjects(){
+	   //1.请求参数
+	   //获取查询的页码值
+	   var pageCurrent=$("#pageId").data("pageCurrent");
+	   console.log("pageCurrent="+pageCurrent)
+	   if(!pageCurrent)pageCurrent=1;
+	   var params={"pageCurrent":pageCurrent}
+	   //获取查询时用户输入的参数名
+	   var name=$("#searchNameId").val();
+	   if(name)params.name=name;
+	   
+	   console.log(params);//pageCurrent=1
+	   //2.请求url
+	   var url="config/doFindPageObjects.do"
+	   //3.发送异步请求(ajax的get请求)
+	   $.getJSON(url,params,function(result){//JsonResult
+		   doHandleResponseResult(result)
+	   });
+   }
+   //处理服务端的响应数据
+   function doHandleResponseResult(result){
+	     console.log(result);
+		 if(result.state==1){
+		  doSetTableBodyRows(result.data.list);
+		  doSetPagination(result.data);
+		 }else{
+		  alert(result.message);
+		 }
+   }
+   
+   //呈现当前页记录
+   function doSetTableBodyRows(list){
+	   //1.获取Tbody对象并清空
+	   var tBody=$("#tbodyId");
+	   tBody.empty();
+	   //2.迭代数据并显示在tbody中
+	   for(var i in list){
+		  //2.1 构建tr对象
+		  var tr=$("<tr></tr>");
+		  tr.data("rowData",list[i]);
+		  //2.2 构建多个td对象
+		  var tds=doCreateTds(list[i]);
+		  //2.3 将td追加到tr中
+		  tr.append(tds);
+		  //2.4 将tr追加到tbody中
+		  tBody.append(tr);
+	   }
+   }
+   function doCreateTds(row){
+	   var tds=
+		"<td><input type='checkbox' class='cBox' name='cItem' value='"+row.id+"'></td>"+
+		"<td>"+row.name+"</td>"+
+		"<td>"+row.value+"</td>"+
+		"<td>"+new Date(row.createdTime).toLocaleDateString()+"</td>"+
+		"<td>"+new Date(row.modifiedTime).toLocaleDateString()+"</td>"+
+		"<td><button type='button' class='btn btn-default btn-update'>update</button></td>";
+	   return tds;
+   }
+</script>
+
+
+
+
+
+
+
+
+
+
+

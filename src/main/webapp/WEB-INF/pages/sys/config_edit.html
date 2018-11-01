@@ -1,0 +1,94 @@
+<!-- Horizontal Form -->
+ <div class="box box-info">
+      <!-- form start -->
+      <form class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="nameId" class="col-sm-2 control-label">参数名</label>
+
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="name" id="nameId" placeholder="名称">
+            </div>
+          </div>
+           <div class="form-group">
+            <label for="valueId" class="col-sm-2 control-label">参数值</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="name" id="valueId" placeholder="名称">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="noteId" class="col-sm-2 control-label">描述</label>
+
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="note" id="noteId" placeholder="描述">
+            </div>
+          </div>
+        </div>
+        <!-- /.box-body -->
+      </form>
+    </div>
+ <script type="text/javascript">
+ 
+ $(function(){
+	 //模态框的保存按钮上注册点击事件
+	 $("#myModal")
+	 .on("click",".btn-save",doSaveOrUpdate);
+	 //注册模态框隐藏时的事件监听
+	 $('#myModal').on('hidden.bs.modal',function (e) {
+		 //移除myMoal对象上绑定的事件
+		 //假如不移除有可能会重现表单重复提交
+		 $("#myModal").off();
+		 //移除模态框绑定的数据
+		 $("#myModal").removeData();
+	 });
+	 //从模态框上获取绑定的数据
+	 var rowData=$("#myModal").data("rowData");
+	 //假如模态框上有数据,则初始化表单数据
+	 if(rowData)doInitEditFormData(rowData);
+ });
+ //初始化表单数据
+ function doInitEditFormData(rowData){
+	 $("#nameId").val(rowData.name);
+	 $("#valueId").val(rowData.value);
+	 $("#noteId").val(rowData.note)
+ }
+ 
+ function doSaveOrUpdate(){
+	 //1.获得表单数据
+	 var data=doGetEditFormData();
+	 var rowData=$("#myModal").data("rowData");
+	 //假如是修改需要再向服务端提交一个id值
+	 if(rowData)data.id=rowData.id;
+	 //2.url
+	 var insertUrl="config/doSaveObject.do";
+	 var updateUrl="config/doUpdateObject.do";
+	 var url=rowData?updateUrl:insertUrl;
+	 //3.异步提交数据
+	 $.post(url,data,function(result){
+		 if(result.state==1){
+			 alert(result.message);
+			 doGetObjects();
+			 $("#myModal").modal("hide");
+		 }else{
+			 alert(result.message);
+		 }
+	 });
+ }
+ //获取编辑页面表单数据
+ function doGetEditFormData(){
+	 var params={
+		 name:$("#nameId").val(),
+		 value:$("#valueId").val(),
+		 note:$("#noteId").val()
+	 };
+	 return params;
+ }
+ </script>
+    
+    
+    
+    
+    
+    
+    
+    

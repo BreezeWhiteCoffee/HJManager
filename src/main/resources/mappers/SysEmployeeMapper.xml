@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.SysEmployeeDao">
+    
+ <resultMap type="jxc.sys.entity.SysEmployee" id="users" autoMapping="true">
+ <id column="id" property="id"/>
+ <result column="store_id" property="storeId"/>
+ </resultMap>
+ 
+ 
+	<select id="findObjects" resultMap="users">
+	    select * from orders 
+	       <include refid="queryWhereId"/>  
+	      order by createTime desc          
+	</select>
+   
+ <!-- 查询用户表所有用户信息 -->
+   <select id="FindPageObjectsByStoreId"
+          resultMap="users">
+        select  *
+				from orders 
+         where store_id=#{storeId}
+         order by createTime desc        
+   </select>
+ 
+   <select id="getRowCounts"
+           resultType="int">
+           select count(*)
+           from orders 
+           <include refid="queryWhereId"/>        
+   </select>
+   
+   <select id="getRowCountsByStoreId"
+           resultType="int">
+           select count(*)
+           from orders 
+           where store_id=#{storeId}
+   </select>
+   
+  
+   
+   <sql id="queryWhereId">
+       <where>
+         <if test="employeename!=null and employeename!=''">
+            employeename like concat("%",#{employeename},"%")
+         </if>
+       </where>
+   </sql>
+    
+</mapper>
+
+
+

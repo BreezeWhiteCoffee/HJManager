@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.StrategyDao">
+
+
+
+
+	<!-- 查询所有商品的销售情况 并倒序，如有货号则根据货号查询 -->
+	<select id="findSalesObjects" resultType="map">
+		select a.articlenumber as articleNumber,a.price as buyPrice
+		,a.saleprice as
+		salePrice ,num,sale_money as saleMoney ,(sale_money -
+		num*a.price ) as
+		profit from product a
+		left join
+		(select
+		articlenumber,sum(amount) as num,sum(money) as sale_money,money
+		from
+		orders
+		group by articlenumber) b ON a.articlenumber = b.articlenumber
+		<where>
+			<if test="articleNumber!=null and articleNumber!=''">
+				a.articlenumber like concat('%',#{articleNumber},'%')
+			</if>
+		</where>
+		order by profit desc
+	</select>
+
+
+	<!-- 查询所有商品的销售情况 并倒序，如有货号则根据货号查询 -->
+	<select id="findSalesObjectsDatas" resultType="jxc.sys.entity.StrategInfo">
+		select a.articlenumber as articleNumber,a.price as buyPrice ,a.saleprice as
+		salePrice ,num,sale_money as saleMoney ,(sale_money - num*a.price ) as
+		profit from product a
+		left join
+		(select articlenumber,sum(amount) as
+		num,sum(money) as sale_money,money
+		from
+		orders
+		group by articlenumber) b
+		ON a.articlenumber = b.articlenumber
+	</select>
+
+</mapper>
+
+
+

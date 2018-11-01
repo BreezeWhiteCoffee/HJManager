@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.OrderDao">
+ <resultMap type="jxc.sys.entity.SysEmployee" id="users" autoMapping="true">
+ <id column="id" property="id"/>
+ <result column="store_id" property="storeId"/>
+ </resultMap>
+<!--新建订单的方法  -->
+<insert id="doOrders"
+useGeneratedKeys="true"
+keyProperty="id">
+insert into orders (employeename,articlenumber,createTime,money,amount,store_id) values
+(#{employeename},#{articlenumber},now(),#{money},#{amount},#{storeId})
+</insert>
+<!--删除订单的方法  -->
+<delete id="deleteById">
+delete from orders where id =#{id}
+</delete>
+<select id="findAmountById" resultType="jxc.sys.entity.Order">
+select * from orders where id=#{id}
+</select>
+</mapper>
+
+
+

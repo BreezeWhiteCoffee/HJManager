@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jxc.sys.dao.ProductDao">
+
+	<sql id="wherearticlenumber">
+		<where>
+			<if test="articlenumber!=null and articlenumber!=''">
+				articlenumber=#{articlenumber}
+			</if>
+		</where>
+	</sql>
+	<sql id="columns">
+		id,
+		articlenumber,
+		gender,
+		season,
+		size,
+		price,
+		saleprice,
+		color,
+		purchasetime,
+		amount
+	</sql>
+	<!--根据货号查找商品 -->
+	<select id="findAll" resultType="jxc.sys.entity.Product">
+		select * from product
+		<include refid="wherearticlenumber"></include>
+	</select>
+	<!-- 修改记录 -->
+	<update id="UpdateObject" parameterType="jxc.sys.entity.Product">
+		update product set
+		articlenumber=#{articlenumber},gender=#{gender},season=#{season},
+		color=#{color},size=#{size},price=#{price} ,saleprice=#{saleprice}
+		,amount=#{amount}
+		where id = #{id}
+	</update>
+	<!-- 通过ID删除 -->
+	<delete id="deleteObjectById">
+		delete from product where id =#{id}
+	</delete>
+	<!-- 通过ID查询数据 -->
+	<select id="findObjectById" resultType="jxc.sys.entity.Product">
+		select
+		<include refid="columns" />
+		from product
+		where id=#{id}
+	</select>
+	<!-- 添加纪录 -->
+	<insert id="insertObject" parameterType="jxc.sys.entity.Product">
+		insert into product (
+		articlenumber,
+		gender,
+		season,
+		color,
+		size,
+		price ,
+		saleprice ,
+		Purchasetime,
+		amount) values
+		(#{articlenumber},#{gender},#{season},#{color},#{size},
+		#{price},#{saleprice},now(),#{amount})
+	</insert>
+	<update id="doOrder">
+		update product set
+		amount=#{amount}
+		where articlenumber = #{articlenumber}
+	</update>
+</mapper>
+
+
+
